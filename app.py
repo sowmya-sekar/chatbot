@@ -1,7 +1,7 @@
 
 import os
 import streamlit as st
-from google import genai
+import google.generativeai as genai
 
 API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
