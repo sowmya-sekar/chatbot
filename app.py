@@ -50,3 +50,5 @@ for role, text in st.session_state.chat:
         st.write(f"🧑 **You:** {text}")
     else:
         st.write(f"🤖 **Bot:** {text}")
+
+app = st
