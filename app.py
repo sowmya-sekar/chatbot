@@ -51,4 +51,3 @@ for role, text in st.session_state.chat:
     else:
         st.write(f"🤖 **Bot:** {text}")
 
-app = st
