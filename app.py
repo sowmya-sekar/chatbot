@@ -2,17 +2,28 @@ import streamlit as st
 import os
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 # API KEY
 os.environ["GOOGLE_API_KEY"] = os.getenv("GEMINI_API_KEY")
 
-# MODEL
+# MODEL via LangChain
 llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
 
-# UI
-st.title("AI Chatbot 🤖 (LangChain Version)")
+# PROMPT TEMPLATE via LangChain
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a helpful AI assistant. If user gives a math expression, calculate it."),
+    MessagesPlaceholder(variable_name="chat_history"),
+    ("human", "{input}")
+])
 
-# MEMORY — store as LangChain message objects
+# CHAIN via LangChain
+chain = prompt | llm
+
+# UI
+st.title("AI Chatbot 🤖")
+
+# MEMORY
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
@@ -25,14 +36,15 @@ if user_input:
     st.session_state.chat.append(("You", user_input))
 
     try:
-        # Add user message to history
-        st.session_state.chat_history.append(HumanMessage(content=user_input))
-
-        # Send full history to AI — LangChain handles it!
-        response = llm.invoke(st.session_state.chat_history)
+        # LangChain handles everything!
+        response = chain.invoke({
+            "chat_history": st.session_state.chat_history,
+            "input": user_input
+        })
         bot_reply = response.content
 
-        # Add AI reply to history
+        # Add to LangChain memory
+        st.session_state.chat_history.append(HumanMessage(content=user_input))
         st.session_state.chat_history.append(AIMessage(content=bot_reply))
 
     except Exception as e:
